@@ -10,7 +10,7 @@
 // })();
 function subwayPainter(l) {
     console.log(l)
-        //地铁线路
+    //地铁线路
     for (var i = 0; i < l.length; i++) {
         console.log(i)
         var { l_xmlattr, p } = l[i]
@@ -96,6 +96,13 @@ function subwayPainter(l) {
             }
         }
     }
+
+    // 这里的 customEventsHandler 对应 data.js中 eventsHandler
+    // 'zoomEnabled' must be true or false. Default is true. 
+    // 'controlIconsEnabled' must be true or false. Default is false.
+    // 'fit' must be true or false. Default is true.
+    // 'center' must be true or false. Default is true.
+    // 'customEventsHandler' must be an object with init and destroy arguments as functions.
     window.panZoom = svgPanZoom('#mobile-svg', {
         zoomEnabled: true,
         controlIconsEnabled: false,
@@ -111,5 +118,4 @@ function subwayPainter(l) {
  * 2.svg image标签路径赋值 -->image[0].href.baseVal = ;
  * 3.pc微信内置浏览器不显示-->es6兼容
  * 4.中转站存在text内容及image相同重叠问题 -->repeatStr.includs(uid)
- * 
  */

@@ -120,43 +120,62 @@ var SubwayCitiesList = [{
     name: "南宁",
     citycode: "261",
 }];
+// 添加select标签内的所有可选项option
 for (var i = 0; i < SubwayCitiesList.length; i++) {
     var { citycode, name } = SubwayCitiesList[i]
     $(`<option value="${citycode}">${name}</option>`).appendTo("select")
 }
-$("select").on("change", function() {
+// 选中option切换当前href，拼接上当前的citycode
+$("select").on("change", function () {
     window.location.href = window.location.href.split("?")[0] + "?cityCode=" + $(this).val()
 })
+// 根据url获取当前的citycode
 var cityCode = $.getUrlQuery("cityCode") || 131
+
+// 设置select的value值，更改当前已选option的value，即可改变选项已选的城市名
 $("select").val(cityCode)
+
+// 设置当前网页title名称：城市名 + "地铁线路图"
 $("head title").html($("select :selected").text() + "地铁线路图")
-var BMapSub = {}
-BMapSub._rd = {};
+
+// 随机一个时间戳，数字5位，小数点后0位
 var timeStamp = (Math.random() * 100000).toFixed(0);
+
+// 请求百度地铁路线的数据 的url（但是这个timeStamp不知道什么作用）？
 var checkUrl = "https://api.map.baidu.com/?qt=subways&c=" + cityCode + "&format=json&ak=yZSTYLk9UUvs0ZqXqBbtTp8ViKk5vxLM&v=3.0&from=jsapi&callback=BMapSub._rd._cbk" + timeStamp
+
+// 使用AJAX请求，获取url对应的脚本数据
 $.getScript(checkUrl)
 
-BMapSub._rd["_cbk" + timeStamp] = function(json) {
+// ？
+var BMapSub = {}
+BMapSub._rd = {};
+BMapSub._rd["_cbk" + timeStamp] = function (json) {
+    // 画图
     subwayPainter(json.subways.l)
 }
 
+// 这里的eventsHandler对应 subway-painter.js中 customEventsHandler: eventsHandler
 var eventsHandler = {
     haltEventListeners: ['touchstart', 'touchend', 'touchmove', 'touchleave', 'touchcancel'],
-    init: function(options) {
+    init: function (options) {
         var instance = options.instance,
             initialScale = 1,
             pannedX = 0,
             pannedY = 0
+
+        // Hammer is a open-source library that can recognize gestures made by touch, mouse and pointerEvents. 
+        // It doesn’t have any dependencies, and it’s small, only 7.34 kB minified + gzipped!
         this.hammer = Hammer(options.svgElement, {
             inputClass: Hammer.SUPPORT_POINTER_EVENTS ? Hammer.PointerEventInput : Hammer.TouchInput
         })
         this.hammer.get('pinch').set({
             enable: true
         })
-        this.hammer.on('doubletap', function(ev) {
+        this.hammer.on('doubletap', function (ev) {
             instance.zoomIn()
         })
-        this.hammer.on('panstart panmove', function(ev) {
+        this.hammer.on('panstart panmove', function (ev) {
             if (ev.type === 'panstart') {
                 pannedX = 0
                 pannedY = 0
@@ -168,7 +187,7 @@ var eventsHandler = {
             pannedX = ev.deltaX
             pannedY = ev.deltaY
         })
-        this.hammer.on('pinchstart pinchmove', function(ev) {
+        this.hammer.on('pinchstart pinchmove', function (ev) {
             if (ev.type === 'pinchstart') {
                 initialScale = instance.getZoom()
                 instance.zoomAtPoint(initialScale * ev.scale, {
@@ -181,11 +200,11 @@ var eventsHandler = {
                 y: ev.center.y
             })
         })
-        options.svgElement.addEventListener('touchmove', function(e) {
+        options.svgElement.addEventListener('touchmove', function (e) {
             e.preventDefault();
         });
     },
-    destroy: function() {
+    destroy: function () {
         this.hammer.destroy()
     }
 }
